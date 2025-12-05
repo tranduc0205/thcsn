@@ -1,0 +1,51 @@
+// 8 chân điều khiển hàng (Row ANODE)
+int rowPin[8] = {2,3,4,5,6,7,8,9};
+
+// 8 chân điều khiển cột (Column CATHODE)
+int colPin[8] = {10,11,12,13,A0,A1,A2,A3};
+
+// Mảng hình mặt cười 8x8 — bit=1 => LED sáng
+const byte smile[8] = {
+  0b00111100,  // Hàng trên cùng
+  0b01000010,
+  0b10100101,  // Hàng có 2 mắt
+  0b10000001,
+  0b10100101,  // Miệng
+  0b10011001,  // Miệng rộng
+  0b01000010,
+  0b00111100   // Hàng dưới cùng
+};
+// Mỗi số nhị phân chứa 8 bit → tương ứng 8 LED trên 1 hàng.
+
+void setup(){
+  // Đặt tất cả chân hàng và cột làm OUTPUT
+  for(int i = 0; i < 8; i++){
+    pinMode(rowPin[i], OUTPUT);
+    pinMode(colPin[i], OUTPUT);
+  }
+}
+void drawFrame(const byte *frame){
+  for(int r = 0; r < 8; r++){               // Quét từng hàng 0 → 7
+
+    // Tắt tất cả hàng trước khi bật hàng mới
+    for(int i = 0; i < 8; i++)
+      digitalWrite(rowPin[i], LOW);
+
+    digitalWrite(rowPin[r], HIGH);          // Bật hàng r
+
+    byte row = frame[r];                    // Lấy 8 bit của hàng r
+
+    // Xuất 8 cột cho hàng hiện tại
+    for(int c = 0; c < 8; c++){
+      int bit = (row >> (7 - c)) & 1;       // đọc từng bit từ trái qua phải
+
+      // Row = anode. bit=1 → LED sáng → Column phải kéo LOW
+      digitalWrite(colPin[c], bit ? LOW : HIGH);
+    }
+
+    delay(1);                               // giữ hàng 1 ms để mắt nhìn thấy sáng
+  }
+}
+void loop(){
+  drawFrame(smile);   // Hiển thị mặt cười liên tục
+}
